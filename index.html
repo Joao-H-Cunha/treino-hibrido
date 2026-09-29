@@ -62,6 +62,11 @@ const DAYS = [
   { short: 'Dom', title: 'Descanso Total', tag: 'Recuperação', kind: 'rest', note: 'Sem treino. Durma bem e deixe o corpo assimilar a semana.' }
 ];
 const FULL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+const MUSCLES = {
+  A: ['Peito', 'Ombro', 'Tríceps'],
+  B: ['Costas', 'Deltoide Posterior', 'Bíceps'],
+  C: ['Quadríceps', 'Posterior de Coxa', 'Glúteos', 'Panturrilha', 'Abdômen']
+};
 
 const GROUPS = {
   supinoReto: ['Supino Reto (Barra)', 'Supino Reto com Halteres', 'Supino Vertical na Máquina'],
@@ -150,7 +155,8 @@ function renderWeek() {
 function renderPanel() {
   const d = DAYS[selected];
   $subtitle.textContent = FULL[selected] + (selected === today ? ' (hoje)' : '');
-  let html = `<div class="mb-4"><p class="text-sm text-hl font-semibold">${d.tag}</p><h2 class="text-2xl font-bold">${d.title}</h2></div>`;
+  const chips = (MUSCLES[d.plan] || [d.tag]).map(m => `<span class="rounded-full border border-hl/60 bg-[#06202a] px-3 py-1 text-xs font-bold uppercase tracking-wide text-hl">${m}</span>`).join('');
+  let html = `<div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2"><h2 class="text-2xl font-extrabold uppercase">${d.title}</h2><div class="flex flex-wrap gap-2">${chips}</div></div>`;
 
   if (d.kind !== 'strength') {
     $panel.innerHTML = html + `<div class="rounded-2xl border border-line bg-card p-5 text-mute leading-relaxed">${d.note}</div>`;
