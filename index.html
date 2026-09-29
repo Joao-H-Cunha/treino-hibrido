@@ -7,24 +7,25 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = { theme: { extend: { colors: {
-  bg: '#0a0c0d', card: '#14181a', line: '#232a2d', neon: '#39ff88', cyan: '#22d3ee', mute: '#8b979c'
+  bg: '#07090b', card: '#0f1317', line: '#1c242b', hl: '#00d4ff', mute: '#7d8b94'
 }, fontFamily: { sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] } } } };
 </script>
 <style>
   :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  body { background: #0a0c0d; color: #eef3f5; -webkit-tap-highlight-color: transparent; }
+  body { background: #07090b; color: #eef3f5; -webkit-tap-highlight-color: transparent; }
+  .glow { box-shadow: 0 0 14px rgba(0, 212, 255, 0.55); }
   .flash { animation: flash 0.8s ease-in-out 4; }
-  @keyframes flash { 0%,100% { background-color: #14181a; } 50% { background-color: #0f5132; } }
-  @media (prefers-reduced-motion: reduce) { .flash { animation: none; background-color: #0f5132; } }
-  .day.active { border-color: #39ff88; background: #10231a; }
-  .day.cardio.active { border-color: #22d3ee; background: #0e2126; }
+  @keyframes flash { 0%,100% { background-color: #0f1317; } 50% { background-color: #06414f; } }
+  @media (prefers-reduced-motion: reduce) { .flash { animation: none; background-color: #06414f; } }
+  .day.active { border-color: #00d4ff; background: #06202a; }
+  input[type=number]::-webkit-inner-spin-button { display: none; }
 </style>
 </head>
 <body class="font-sans min-h-screen">
-<main class="mx-auto max-w-xl px-4 pt-5 pb-44">
+<main class="mx-auto max-w-xl px-4 pt-5 pb-48">
   <header class="mb-5">
-    <h1 class="text-2xl font-extrabold tracking-tight">Treino <span class="text-neon">híbrido</span></h1>
+    <h1 class="text-2xl font-extrabold tracking-tight">Treino <span class="text-hl">híbrido</span></h1>
     <p id="subtitle" class="text-sm text-mute mt-1"></p>
   </header>
   <nav id="week" class="grid grid-cols-7 gap-1.5 mb-5" aria-label="Semana"></nav>
@@ -40,10 +41,11 @@ tailwind.config = { theme: { extend: { colors: {
       </div>
       <p id="clockMsg" class="text-sm text-mute text-right">Escolha um tempo</p>
     </div>
-    <div class="grid grid-cols-4 gap-2">
+    <div class="grid grid-cols-5 gap-2">
       <button data-sec="45" class="tbtn rounded-xl bg-bg border border-line py-3 font-semibold active:scale-95">45s</button>
       <button data-sec="60" class="tbtn rounded-xl bg-bg border border-line py-3 font-semibold active:scale-95">60s</button>
       <button data-sec="90" class="tbtn rounded-xl bg-bg border border-line py-3 font-semibold active:scale-95">90s</button>
+      <button data-sec="120" class="tbtn rounded-xl bg-bg border border-line py-3 font-semibold active:scale-95">2min</button>
       <button id="stop" class="rounded-xl border border-line py-3 font-semibold text-mute active:scale-95">Parar</button>
     </div>
   </div>
@@ -51,35 +53,56 @@ tailwind.config = { theme: { extend: { colors: {
 
 <script>
 const DAYS = [
-  { short: 'Seg', title: 'Treino A', tag: 'Força', kind: 'strength', plan: 'A' },
-  { short: 'Ter', title: 'Corrida Base', tag: 'Cardio', kind: 'cardio', note: 'Ritmo leve e constante, em que você consiga conversar. Foque em construir base aeróbica.' },
-  { short: 'Qua', title: 'Treino B', tag: 'Força', kind: 'strength', plan: 'B' },
+  { short: 'Seg', title: 'Treino A', tag: 'Peito · Ombro · Tríceps', kind: 'strength', plan: 'A' },
+  { short: 'Ter', title: 'Corrida Base', tag: 'Cardio', kind: 'cardio', note: 'Ritmo leve e constante, em que você consiga conversar. Construa base aeróbica sem comprometer a recuperação dos treinos de força.' },
+  { short: 'Qua', title: 'Treino B', tag: 'Costas · Posterior · Bíceps', kind: 'strength', plan: 'B' },
   { short: 'Qui', title: 'Descanso Ativo', tag: 'Recuperação', kind: 'rest', note: 'Caminhada leve, mobilidade ou alongamento. Nada que cause fadiga.' },
-  { short: 'Sex', title: 'Treino C', tag: 'Força', kind: 'strength', plan: 'C' },
+  { short: 'Sex', title: 'Treino C', tag: 'Pernas · Abdômen', kind: 'strength', plan: 'C' },
   { short: 'Sáb', title: 'Corrida de Volume', tag: 'Cardio', kind: 'cardio', note: 'Corrida mais longa da semana em ritmo confortável. Hidrate-se e priorize o tempo em movimento.' },
   { short: 'Dom', title: 'Descanso Total', tag: 'Recuperação', kind: 'rest', note: 'Sem treino. Durma bem e deixe o corpo assimilar a semana.' }
 ];
 const FULL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 
 const GROUPS = {
-  supinoReto: ['Supino Reto', 'Supino Reto com Halteres', 'Supino Vertical na Máquina'],
-  supinoInc: ['Supino Inclinado com Halteres', 'Supino Inclinado com Barra', 'Supino Inclinado na Máquina'],
-  desenv: ['Desenvolvimento Sentado com Halteres', 'Desenvolvimento na Máquina', 'Desenvolvimento com Barra'],
-  triceps: ['Tríceps Corda', 'Tríceps Testa na Polia', 'Tríceps Coice'],
-  puxada: ['Puxada Aberta', 'Puxada com Triângulo', 'Pulldown na Polia'],
-  remada: ['Remada Aberta na Máquina', 'Remada Curvada com Barra', 'Remada Baixa Sentada'],
-  inverso: ['Crucifixo Inverso com Halteres', 'Crucifixo Inverso no Peck Deck / Máquina'],
-  rosca: ['Rosca Direta com Barra W', 'Rosca Direta com Halteres', 'Rosca Alternada no Banco Inclinado'],
-  perna: ['Leg Press 45°', 'Agachamento Hack', 'Agachamento no Smith'],
+  supinoReto: ['Supino Reto (Barra)', 'Supino Reto com Halteres', 'Supino Vertical na Máquina'],
+  supinoInc: ['Supino Inclinado (Halteres)', 'Supino Inclinado com Barra', 'Supino Inclinado na Máquina'],
+  crucifixo: ['Crucifixo Reto', 'Crossover na Polia', 'Pec Deck Peitoral'],
+  desenv: ['Desenvolvimento com Halteres', 'Desenvolvimento na Máquina', 'Desenvolvimento com Barra'],
+  lateral: ['Elevação Lateral (Halteres)', 'Elevação Lateral no Cabo'],
+  tricepsA: ['Tríceps Testa', 'Tríceps Corda na Polia', 'Tríceps Coice'],
+  tricepsB: ['Tríceps Paralelas', 'Tríceps Banco', 'Tríceps Supinado'],
+  puxada: ['Puxada Aberta (Pulley)', 'Puxada com Triângulo', 'Pulldown na Polia'],
+  remadaA: ['Remada Curvada (Barra)', 'Remada Cavalinho', 'Remada Unilateral com Halter'],
+  remadaB: ['Remada Baixa (Triângulo)', 'Remada Aberta na Máquina'],
+  inverso: ['Crucifixo Inverso (Pec Deck)', 'Crucifixo Inverso com Halteres'],
+  rosca: ['Rosca Direta (Barra W)', 'Rosca Direta (Barra Reta)', 'Rosca Scott'],
+  martelo: ['Rosca Martelo (Halteres)', 'Rosca Martelo na Polia com Corda'],
+  agacha: ['Agachamento Livre', 'Leg Press 45°', 'Agachamento Hack'],
   extensora: ['Cadeira Extensora', 'Cadeira Extensora Unilateral'],
-  flexora: ['Cadeira Flexora', 'Mesa Flexora deitado', 'Flexão de Pernas em Pé']
+  flexora: ['Mesa Flexora (Deitado)', 'Cadeira Flexora (Sentado)'],
+  stiff: ['Stiff com Halteres', 'Stiff com Barra', 'Elevação Pélvica'],
+  gemeos: ['Gêmeos em Pé (Panturrilhas)', 'Gêmeos Sentado'],
+  abdomen: ['Abdominal Supra na Polia', 'Abdominal Infra no Banco', 'Prancha Isométrica']
 };
 const PLANS = {
-  A: ['supinoReto', 'supinoInc', 'desenv', 'triceps'],
-  B: ['puxada', 'remada', 'inverso', 'rosca'],
-  C: ['perna', 'extensora', 'flexora']
+  A: [
+    { g: 'supinoReto', sets: 4, reps: '8-10' }, { g: 'supinoInc', sets: 3, reps: '10' },
+    { g: 'crucifixo', sets: 3, reps: '12' }, { g: 'desenv', sets: 3, reps: '8-10' },
+    { g: 'lateral', sets: 4, reps: '12-15' }, { g: 'tricepsA', sets: 3, reps: '10' },
+    { g: 'tricepsB', sets: 3, reps: 'Até a falha' }
+  ],
+  B: [
+    { g: 'puxada', sets: 4, reps: '10' }, { g: 'remadaA', sets: 3, reps: '8-10' },
+    { g: 'remadaB', sets: 3, reps: '10-12' }, { g: 'inverso', sets: 4, reps: '12' },
+    { g: 'rosca', sets: 3, reps: '10' }, { g: 'martelo', sets: 3, reps: '12' }
+  ],
+  C: [
+    { g: 'agacha', sets: 4, reps: '8-10' },
+    { g: 'extensora', sets: 3, reps: '12', note: 'Drop-set na última série' },
+    { g: 'flexora', sets: 4, reps: '10' }, { g: 'stiff', sets: 3, reps: '10' },
+    { g: 'gemeos', sets: 4, reps: '15' }, { g: 'abdomen', sets: 3, reps: '15' }
+  ]
 };
-const SETS = 3, REPS = '10 a 12', CADENCE = 'Fase de descida lenta: 3 segundos';
 
 const $week = document.getElementById('week');
 const $panel = document.getElementById('panel');
@@ -93,13 +116,13 @@ function weekId() {
   return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
 }
 const WID = weekId();
-let state = { choices: {}, checks: {}, week: WID };
+let state = { choices: {}, checks: {}, loads: {}, week: WID };
 try {
-  const raw = localStorage.getItem('treino-hibrido');
-  if (raw) state = JSON.parse(raw);
-  if (state.week !== WID) state = { choices: state.choices || {}, checks: {}, week: WID };
+  const raw = localStorage.getItem('treino-hipertrofia-v2');
+  if (raw) state = Object.assign(state, JSON.parse(raw));
+  if (state.week !== WID) { state.checks = {}; state.week = WID; }
 } catch (e) {}
-function save() { try { localStorage.setItem('treino-hibrido', JSON.stringify(state)); } catch (e) {} }
+function save() { try { localStorage.setItem('treino-hipertrofia-v2', JSON.stringify(state)); } catch (e) {} }
 
 const choiceOf = g => Math.min(state.choices[g] || 0, GROUPS[g].length - 1);
 const checkKey = (day, g, s) => WID + ':' + day + ':' + g + ':' + s;
@@ -107,28 +130,27 @@ const isDone = (day, g, s) => !!state.checks[checkKey(day, g, s)];
 
 function progress(day) {
   const plan = PLANS[DAYS[day].plan]; if (!plan) return null;
-  let done = 0;
-  plan.forEach(g => { for (let s = 0; s < SETS; s++) if (isDone(day, g, s)) done++; });
-  return { done, total: plan.length * SETS };
+  let done = 0, total = 0;
+  plan.forEach(e => { for (let s = 0; s < e.sets; s++) { total++; if (isDone(day, e.g, s)) done++; } });
+  return { done, total };
 }
 
 function renderWeek() {
   $week.innerHTML = DAYS.map((d, i) => {
     const p = progress(i);
     const finished = p && p.done === p.total;
-    return `<button data-day="${i}" class="day ${d.kind === 'cardio' ? 'cardio' : ''} ${i === selected ? 'active' : ''} rounded-xl border border-line bg-card px-0.5 py-2.5 flex flex-col items-center gap-1" aria-label="${FULL[i]}: ${d.title}">
-      <span class="text-xs ${i === today ? 'text-neon font-bold' : 'text-mute'}">${d.short}</span>
+    return `<button data-day="${i}" class="day ${i === selected ? 'active' : ''} rounded-xl border border-line bg-card px-0.5 py-2.5 flex flex-col items-center gap-1" aria-label="${FULL[i]}: ${d.title}">
+      <span class="text-xs ${i === today ? 'text-hl font-bold' : 'text-mute'}">${d.short}</span>
       <span class="text-lg leading-none">${d.kind === 'strength' ? '🏋️' : d.kind === 'cardio' ? '🏃' : '🌙'}</span>
-      <span class="text-[10px] leading-none ${finished ? 'text-neon' : 'text-mute'}">${finished ? 'feito' : d.plan ? d.plan : d.kind === 'cardio' ? 'run' : 'off'}</span>
+      <span class="text-[10px] leading-none ${finished ? 'text-hl font-bold' : 'text-mute'}">${finished ? 'feito' : d.plan ? d.plan : d.kind === 'cardio' ? 'run' : 'off'}</span>
     </button>`;
   }).join('');
 }
 
 function renderPanel() {
   const d = DAYS[selected];
-  const accent = d.kind === 'cardio' ? 'text-cyan' : d.kind === 'strength' ? 'text-neon' : 'text-mute';
   $subtitle.textContent = FULL[selected] + (selected === today ? ' (hoje)' : '');
-  let html = `<div class="mb-4"><p class="text-sm ${accent} font-semibold">${d.tag}</p><h2 class="text-2xl font-bold">${d.title}</h2></div>`;
+  let html = `<div class="mb-4"><p class="text-sm text-hl font-semibold">${d.tag}</p><h2 class="text-2xl font-bold">${d.title}</h2></div>`;
 
   if (d.kind !== 'strength') {
     $panel.innerHTML = html + `<div class="rounded-2xl border border-line bg-card p-5 text-mute leading-relaxed">${d.note}</div>`;
@@ -136,30 +158,37 @@ function renderPanel() {
   }
 
   const p = progress(selected);
-  html += `<div class="rounded-xl border border-neon/40 bg-[#10231a] p-3.5 text-sm mb-4">
-    <strong class="text-neon">Atenção:</strong> Expire pela boca na subida. Nunca prenda a respiração (Prevenção de Refluxo/Úlcera).
+  html += `<div class="rounded-xl border border-hl bg-[#06202a] p-3.5 text-sm mb-4 glow">
+    <strong class="text-hl">REGRA DE HIPERTROFIA:</strong> Controle Absoluto. Fase Concêntrica Explosiva (1-2s) + Fase Excêntrica Cadenciada (3s lentos na descida). Suba a carga se atingir o teto de repetições da série.
   </div>
   <div class="mb-5">
     <div class="flex justify-between text-xs text-mute mb-1.5"><span>Séries concluídas</span><span id="pcount">${p.done}/${p.total}</span></div>
-    <div class="h-2 rounded-full bg-line overflow-hidden"><div id="pbar" class="h-full bg-neon transition-all" style="width:${p.done / p.total * 100}%"></div></div>
+    <div class="h-2 rounded-full bg-line overflow-hidden"><div id="pbar" class="h-full bg-hl transition-all" style="width:${p.done / p.total * 100}%"></div></div>
   </div>`;
 
-  html += PLANS[d.plan].map(g => {
-    const idx = choiceOf(g);
-    const opts = GROUPS[g].map((n, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${n}</option>`).join('');
-    const boxes = Array.from({ length: SETS }, (_, s) => `
-      <label class="flex-1 flex flex-col items-center gap-1.5 rounded-xl border border-line bg-bg py-3 cursor-pointer">
-        <input type="checkbox" data-g="${g}" data-s="${s}" class="h-7 w-7 accent-[#39ff88]" ${isDone(selected, g, s) ? 'checked' : ''}>
-        <span class="text-xs text-mute">Série ${s + 1}</span>
-      </label>`).join('');
+  html += PLANS[d.plan].map((e, n) => {
+    const g = e.g, idx = choiceOf(g), name = GROUPS[g][idx];
+    const opts = GROUPS[g].map((o, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${o}</option>`).join('');
+    const circles = Array.from({ length: e.sets }, (_, s) => {
+      const on = isDone(selected, g, s);
+      return `<button data-g="${g}" data-s="${s}" aria-pressed="${on}" aria-label="Série ${s + 1}" class="set h-11 w-11 rounded-full border-2 font-bold text-sm active:scale-90 transition ${on ? 'bg-hl border-hl text-bg glow' : 'border-line text-mute'}">${s + 1}</button>`;
+    }).join('');
+    const load = state.loads[name] == null ? '' : state.loads[name];
     return `<article class="rounded-2xl border border-line bg-card p-4 mb-3.5">
-      <h3 class="text-lg font-bold leading-snug mb-1">${GROUPS[g][idx]}</h3>
-      <p class="text-sm mb-1"><span class="text-neon font-semibold">${SETS}x</span> de <span class="text-neon font-semibold">${REPS}</span> repetições</p>
-      <p class="text-sm text-cyan mb-3">${CADENCE}</p>
-      <div class="flex gap-2 mb-3">${boxes}</div>
+      <p class="text-xs text-mute mb-0.5">Exercício ${n + 1}</p>
+      <h3 class="text-lg font-bold leading-snug mb-1">${name}</h3>
+      <p class="text-sm mb-1"><span class="text-hl font-semibold">${e.sets} séries</span> x <span class="text-hl font-semibold">${e.reps}</span>${e.reps.startsWith('Até') ? '' : ' repetições'}</p>
+      ${e.note ? `<p class="text-sm text-hl mb-1">${e.note}</p>` : ''}
+      <div class="flex items-center justify-between gap-3 my-3">
+        <div class="flex gap-2 flex-wrap">${circles}</div>
+        <label class="shrink-0 text-right">
+          <span class="block text-[11px] text-mute mb-1">Carga Atual (kg)</span>
+          <input type="number" inputmode="decimal" step="0.5" min="0" placeholder="0" value="${load}" data-load="${name}" class="w-20 rounded-lg border border-line bg-bg px-2 py-2 text-center text-base font-semibold text-hl focus:outline-none focus:border-hl">
+        </label>
+      </div>
       <div class="flex gap-2">
         <select data-swap="${g}" aria-label="Alternar exercício equivalente" class="flex-1 min-w-0 rounded-lg border border-line bg-bg px-2.5 py-2 text-sm text-mute">${opts}</select>
-        <button data-cycle="${g}" class="shrink-0 rounded-lg border border-line bg-bg px-3.5 py-2 text-sm font-semibold text-cyan active:scale-95">⇄ Alternar</button>
+        <button data-cycle="${g}" class="shrink-0 rounded-lg border border-line bg-bg px-3.5 py-2 text-sm font-semibold text-hl active:scale-95">⇄ Alternar</button>
       </div>
     </article>`;
   }).join('');
@@ -171,28 +200,34 @@ $week.addEventListener('click', e => {
   selected = +b.dataset.day; renderWeek(); renderPanel();
 });
 $panel.addEventListener('change', e => {
-  const t = e.target;
-  if (t.dataset.swap) { state.choices[t.dataset.swap] = +t.value; save(); renderPanel(); }
-  else if (t.dataset.g) {
-    state.checks[checkKey(selected, t.dataset.g, t.dataset.s)] = t.checked; save();
-    const p = progress(selected);
-    document.getElementById('pcount').textContent = p.done + '/' + p.total;
-    document.getElementById('pbar').style.width = (p.done / p.total * 100) + '%';
-    renderWeek();
-    if (t.checked) startTimer(lastSeconds);
-  }
+  if (e.target.dataset.swap) { state.choices[e.target.dataset.swap] = +e.target.value; save(); renderPanel(); }
+});
+$panel.addEventListener('input', e => {
+  const name = e.target.dataset.load; if (!name) return;
+  if (e.target.value === '') delete state.loads[name]; else state.loads[name] = e.target.value;
+  save();
 });
 $panel.addEventListener('click', e => {
-  const b = e.target.closest('[data-cycle]'); if (!b) return;
-  const g = b.dataset.cycle;
-  state.choices[g] = (choiceOf(g) + 1) % GROUPS[g].length; save(); renderPanel();
+  const c = e.target.closest('[data-cycle]');
+  if (c) { const g = c.dataset.cycle; state.choices[g] = (choiceOf(g) + 1) % GROUPS[g].length; save(); renderPanel(); return; }
+  const b = e.target.closest('.set'); if (!b) return;
+  const key = checkKey(selected, b.dataset.g, b.dataset.s);
+  const on = !state.checks[key];
+  state.checks[key] = on; save();
+  b.setAttribute('aria-pressed', on);
+  b.className = 'set h-11 w-11 rounded-full border-2 font-bold text-sm active:scale-90 transition ' + (on ? 'bg-hl border-hl text-bg glow' : 'border-line text-mute');
+  const p = progress(selected);
+  document.getElementById('pcount').textContent = p.done + '/' + p.total;
+  document.getElementById('pbar').style.width = (p.done / p.total * 100) + '%';
+  renderWeek();
+  if (on) startTimer(lastSeconds);
 });
 
 /* Cronômetro regressivo */
 const $clock = document.getElementById('clock');
 const $msg = document.getElementById('clockMsg');
 const $timer = document.getElementById('timer');
-let endAt = 0, tick = null, lastSeconds = 60, lastLeft = -1, audioCtx = null;
+let endAt = 0, tick = null, lastSeconds = 90, lastLeft = -1, audioCtx = null;
 
 function beep(ms, freq) {
   try {
@@ -209,18 +244,18 @@ const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 
 function startTimer(sec) {
   lastSeconds = sec; endAt = Date.now() + sec * 1000;
   $timer.classList.remove('flash'); clearInterval(tick);
-  document.querySelectorAll('.tbtn').forEach(b => b.classList.toggle('border-cyan', +b.dataset.sec === sec));
-  $msg.textContent = 'Descansando…'; $msg.className = 'text-sm text-cyan text-right';
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.toggle('border-hl', +b.dataset.sec === sec));
+  $msg.textContent = 'Descansando…'; $msg.className = 'text-sm text-mute text-right';
   lastLeft = -1; update(); tick = setInterval(update, 250);
 }
 function update() {
   const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
   $clock.textContent = fmt(left);
   const warn = left > 0 && left <= 5;
-  $clock.classList.toggle('text-amber-400', warn);
+  $clock.classList.toggle('text-hl', warn);
   if (warn) {
     $msg.textContent = 'A série volta em ' + left + 's. Prepare-se!';
-    $msg.className = 'text-sm text-amber-400 font-semibold text-right';
+    $msg.className = 'text-sm text-hl font-semibold text-right';
     if (left !== lastLeft) { beep(90, 880); if (navigator.vibrate) navigator.vibrate(60); }
   }
   lastLeft = left;
@@ -228,14 +263,14 @@ function update() {
     clearInterval(tick);
     beep(400, 1200);
     $timer.classList.add('flash');
-    $msg.textContent = 'Descanso finalizado. Próxima série!'; $msg.className = 'text-sm text-neon font-semibold text-right';
+    $msg.textContent = 'Descanso finalizado. Próxima série!'; $msg.className = 'text-sm text-hl font-semibold text-right';
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   }
 }
 function stopTimer() {
-  clearInterval(tick); $timer.classList.remove('flash'); $clock.classList.remove('text-amber-400'); $clock.textContent = '00:00';
+  clearInterval(tick); $timer.classList.remove('flash'); $clock.classList.remove('text-hl'); $clock.textContent = '00:00';
   $msg.textContent = 'Escolha um tempo'; $msg.className = 'text-sm text-mute text-right';
-  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('border-cyan'));
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('border-hl'));
 }
 document.querySelectorAll('.tbtn').forEach(b => b.addEventListener('click', () => startTimer(+b.dataset.sec)));
 document.getElementById('stop').addEventListener('click', stopTimer);
