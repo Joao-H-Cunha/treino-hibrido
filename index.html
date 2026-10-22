@@ -57,59 +57,61 @@ tailwind.config = { theme: { extend: { colors: {
 
 <script>
 const DAYS = [
-  { short: 'Seg', title: 'Treino A', tag: 'Peito · Ombro · Tríceps', kind: 'strength', plan: 'A' },
-  { short: 'Ter', title: 'Corrida Base', tag: 'Cardio', kind: 'cardio', note: 'Ritmo leve e constante, em que você consiga conversar. Construa base aeróbica sem comprometer a recuperação dos treinos de força.' },
-  { short: 'Qua', title: 'Treino B', tag: 'Costas · Posterior · Bíceps', kind: 'strength', plan: 'B' },
-  { short: 'Qui', title: 'Descanso Ativo', tag: 'Recuperação', kind: 'rest', note: 'Caminhada leve, mobilidade ou alongamento. Nada que cause fadiga.' },
-  { short: 'Sex', title: 'Treino C', tag: 'Pernas · Abdômen', kind: 'strength', plan: 'C' },
-  { short: 'Sáb', title: 'Corrida de Volume', tag: 'Cardio', kind: 'cardio', note: 'Corrida mais longa da semana em ritmo confortável. Hidrate-se e priorize o tempo em movimento.' },
-  { short: 'Dom', title: 'Descanso Total', tag: 'Recuperação', kind: 'rest', note: 'Sem treino. Durma bem e deixe o corpo assimilar a semana.' }
+  { short: 'Seg', title: 'Full Body A', tag: 'Musculação', kind: 'strength', plan: 'A' },
+  { short: 'Ter', title: 'Corrida · Squad Javali', tag: 'Cardio', kind: 'cardio', note: 'Treino com o Squad Javali, intensidade conforme a programação.' },
+  { short: 'Qua', title: 'Full Body B', tag: 'Musculação', kind: 'strength', plan: 'B' },
+  { short: 'Qui', title: 'Corrida Leve a Moderada', tag: 'Cardio', kind: 'cardio', note: 'Preferencialmente corrida leve a moderada, de 30 a 45 minutos, conforme a recuperação. Sem cardio obrigatório após a musculação.' },
+  { short: 'Sex', title: 'Full Body C', tag: 'Musculação', kind: 'strength', plan: 'C' },
+  { short: 'Sáb', title: 'Descanso', tag: 'Descanso', kind: 'rest', note: 'Dia de descanso. Durma bem e deixe o corpo se recuperar.' },
+  { short: 'Dom', title: 'Descanso', tag: 'Descanso', kind: 'rest', note: 'Descanso. Uma corrida leve no domingo pode substituir uma das corridas da semana, mas não é obrigatória.' }
 ];
 const FULL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 const MUSCLES = {
-  A: ['Peito', 'Ombro', 'Tríceps'],
-  B: ['Costas', 'Deltoide Posterior', 'Bíceps'],
-  C: ['Quadríceps', 'Posterior de Coxa', 'Glúteos', 'Panturrilha', 'Abdômen']
+  A: ['Full Body', 'Peito', 'Costas'],
+  B: ['Full Body', 'Costas', 'Posteriores'],
+  C: ['Full Body', 'Superiores']
+};
+const INFO = {
+  A: { dur: '45–60 min' },
+  B: { dur: '45–60 min' },
+  C: { dur: '50–60 min', extra: 'Se a corrida de quinta foi muito intensa, ajuste o trabalho de pernas hoje.' }
 };
 
 const GROUPS = {
-  supinoReto: ['Supino Reto (Barra)', 'Supino Reto com Halteres', 'Supino Vertical na Máquina'],
-  supinoInc: ['Supino Inclinado (Halteres)', 'Supino Inclinado com Barra', 'Supino Inclinado na Máquina'],
-  crucifixo: ['Crucifixo Reto', 'Crossover na Polia', 'Pec Deck Peitoral'],
-  desenv: ['Desenvolvimento com Halteres', 'Desenvolvimento na Máquina', 'Desenvolvimento com Barra'],
-  lateral: ['Elevação Lateral (Halteres)', 'Elevação Lateral no Cabo'],
-  tricepsA: ['Tríceps Testa', 'Tríceps Corda na Polia', 'Tríceps Coice'],
-  tricepsB: ['Tríceps Paralelas', 'Tríceps Banco', 'Tríceps Supinado'],
-  puxada: ['Puxada Aberta (Pulley)', 'Puxada com Triângulo', 'Pulldown na Polia'],
-  remadaA: ['Remada Curvada (Barra)', 'Remada Cavalinho', 'Remada Unilateral com Halter'],
-  remadaB: ['Remada Baixa (Triângulo)', 'Remada Aberta na Máquina'],
-  inverso: ['Crucifixo Inverso (Pec Deck)', 'Crucifixo Inverso com Halteres'],
-  rosca: ['Rosca Direta (Barra W)', 'Rosca Direta (Barra Reta)', 'Rosca Scott'],
-  martelo: ['Rosca Martelo (Halteres)', 'Rosca Martelo na Polia com Corda'],
-  agacha: ['Agachamento Livre', 'Leg Press 45°', 'Agachamento Hack'],
-  extensora: ['Cadeira Extensora', 'Cadeira Extensora Unilateral'],
+  supinoMaq: ['Supino Reto na Máquina', 'Supino Reto com Halteres', 'Supino Reto (Barra)'],
+  puxadaFrente: ['Puxada Alta na Frente', 'Puxada com Triângulo', 'Pulldown na Polia'],
+  legPress: ['Leg Press 45°', 'Agachamento Hack', 'Agachamento no Smith'],
+  desenvMaq: ['Desenvolvimento de Ombros na Máquina', 'Desenvolvimento com Halteres', 'Desenvolvimento com Barra'],
+  triPolia: ['Tríceps na Polia', 'Tríceps Testa na Polia', 'Tríceps Coice'],
+  roscaDireta: ['Rosca Direta', 'Rosca na Máquina'],
+  remadaSent: ['Remada Sentada na Máquina', 'Remada Baixa Sentada', 'Remada Aberta na Máquina'],
+  supIncMaq: ['Supino Inclinado na Máquina', 'Supino Inclinado (Halteres)', 'Supino Inclinado com Barra'],
   flexora: ['Mesa Flexora (Deitado)', 'Cadeira Flexora (Sentado)'],
-  stiff: ['Stiff com Halteres', 'Stiff com Barra', 'Elevação Pélvica'],
-  gemeos: ['Gêmeos em Pé (Panturrilhas)', 'Gêmeos Sentado'],
-  abdomen: ['Abdominal Supra na Polia', 'Abdominal Infra no Banco', 'Prancha Isométrica']
+  lateral: ['Elevação Lateral (Halteres)', 'Elevação Lateral no Cabo'],
+  roscaScott: ['Rosca Scott na Máquina', 'Rosca Scott'],
+  triAcima: ['Tríceps Acima da Cabeça na Polia'],
+  chestPress: ['Chest Press (Máquina)', 'Supino Reto com Halteres', 'Supino Reto (Barra)'],
+  remadaArt: ['Remada Articulada'],
+  extensora: ['Cadeira Extensora', 'Cadeira Extensora Unilateral'],
+  martelo: ['Rosca Martelo (Halteres)', 'Rosca Martelo na Polia com Corda'],
+  triCorda: ['Tríceps na Corda']
 };
 const PLANS = {
   A: [
-    { g: 'supinoReto', sets: 4, reps: '8-10' }, { g: 'supinoInc', sets: 3, reps: '10' },
-    { g: 'crucifixo', sets: 3, reps: '12' }, { g: 'desenv', sets: 3, reps: '8-10' },
-    { g: 'lateral', sets: 4, reps: '12-15' }, { g: 'tricepsA', sets: 3, reps: '10' },
-    { g: 'tricepsB', sets: 3, reps: 'Até a falha' }
+    { g: 'supinoMaq', sets: 3, reps: '8–12' }, { g: 'puxadaFrente', sets: 3, reps: '8–12' },
+    { g: 'legPress', sets: 3, reps: '10–12' }, { g: 'desenvMaq', sets: 2, reps: '8–12' },
+    { g: 'triPolia', sets: 2, reps: '10–15' }, { g: 'roscaDireta', sets: 2, reps: '10–12' }
   ],
   B: [
-    { g: 'puxada', sets: 4, reps: '10' }, { g: 'remadaA', sets: 3, reps: '8-10' },
-    { g: 'remadaB', sets: 3, reps: '10-12' }, { g: 'inverso', sets: 4, reps: '12' },
-    { g: 'rosca', sets: 3, reps: '10' }, { g: 'martelo', sets: 3, reps: '12' }
+    { g: 'remadaSent', sets: 3, reps: '8–12' }, { g: 'supIncMaq', sets: 3, reps: '8–12' },
+    { g: 'flexora', sets: 3, reps: '10–15' }, { g: 'lateral', sets: 3, reps: '12–15' },
+    { g: 'roscaScott', sets: 2, reps: '10–12' }, { g: 'triAcima', sets: 2, reps: '10–15' }
   ],
   C: [
-    { g: 'agacha', sets: 4, reps: '8-10' },
-    { g: 'extensora', sets: 3, reps: '12', note: 'Drop-set na última série' },
-    { g: 'flexora', sets: 4, reps: '10' }, { g: 'stiff', sets: 3, reps: '10' },
-    { g: 'gemeos', sets: 4, reps: '15' }, { g: 'abdomen', sets: 3, reps: '15' }
+    { g: 'chestPress', sets: 3, reps: '8–12' }, { g: 'remadaArt', sets: 3, reps: '8–12' },
+    { g: 'extensora', sets: 2, reps: '10–15' }, { g: 'flexora', sets: 2, reps: '10–15' },
+    { g: 'lateral', sets: 2, reps: '12–15' }, { g: 'martelo', sets: 2, reps: '10–12' },
+    { g: 'triCorda', sets: 2, reps: '10–15' }
   ]
 };
 
@@ -160,7 +162,7 @@ function renderPanel() {
   const d = DAYS[selected];
   $subtitle.textContent = FULL[selected] + (selected === today ? ' (hoje)' : '');
   const chips = (MUSCLES[d.plan] || [d.tag]).map(m => `<span class="rounded-full border border-hl/60 bg-[#06202a] px-3 py-1 text-xs font-bold uppercase tracking-wide text-hl">${m}</span>`).join('');
-  let html = `<div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2"><h2 class="text-2xl font-extrabold uppercase">${d.title}</h2><div class="flex flex-wrap gap-2">${chips}</div></div>`;
+  let html = `<div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2"><h2 class="text-2xl font-extrabold uppercase">${d.title}</h2><div class="flex flex-wrap gap-2">${chips}</div></div>`;
 
   if (d.kind !== 'strength') {
     $panel.innerHTML = html + `<div class="rounded-2xl border border-line bg-card p-5 text-mute leading-relaxed">${d.note}</div>`;
@@ -168,7 +170,10 @@ function renderPanel() {
   }
 
   const p = progress(selected);
-  html += `<div class="rounded-xl border border-hl bg-[#06202a] p-3.5 text-sm mb-4 glow">
+  const info = INFO[d.plan];
+  html += `<p class="text-sm text-mute mb-1">${PLANS[d.plan].length} exercícios · <span class="text-hl font-semibold">${p.total} séries no total</span> · ${info.dur}</p>
+  <p class="text-xs text-mute mb-4">Descanso sugerido: cerca de 2 min nos compostos e 60–90 s nos isolados.${info.extra ? ' ' + info.extra : ''}</p>
+  <div class="rounded-xl border border-hl bg-[#06202a] p-3.5 text-sm mb-4 glow">
     <strong class="text-hl">REGRA DE HIPERTROFIA:</strong> Controle Absoluto. Fase Concêntrica Explosiva (1-2s) + Fase Excêntrica Cadenciada (3s lentos na descida). Suba a carga se atingir o teto de repetições da série.
   </div>
   <div class="mb-5">
@@ -184,22 +189,22 @@ function renderPanel() {
       return `<button data-g="${g}" data-s="${s}" aria-pressed="${on}" aria-label="Série ${s + 1}" class="set h-11 w-11 rounded-full border-2 font-bold text-sm active:scale-90 transition ${on ? 'bg-hl border-hl text-bg glow' : 'border-line text-mute'}">${s + 1}</button>`;
     }).join('');
     const load = state.loads[name] == null ? '' : state.loads[name];
+    const swap = GROUPS[g].length > 1 ? `
+      <div class="flex gap-2">
+        <select data-swap="${g}" aria-label="Alternar exercício equivalente" class="flex-1 min-w-0 rounded-lg border border-line bg-bg px-2.5 py-2 text-sm text-mute">${opts}</select>
+        <button data-cycle="${g}" class="shrink-0 rounded-lg border border-line bg-bg px-3.5 py-2 text-sm font-semibold text-hl active:scale-95">⇄ Alternar</button>
+      </div>` : '';
     return `<article class="rounded-2xl border border-line bg-card p-4 mb-3.5">
       <p class="text-xs text-mute mb-0.5">Exercício ${n + 1}</p>
       <h3 class="text-lg font-bold leading-snug mb-1">${name}</h3>
-      <p class="text-sm mb-1"><span class="text-hl font-semibold">${e.sets} séries</span> x <span class="text-hl font-semibold">${e.reps}</span>${e.reps.startsWith('Até') ? '' : ' repetições'}</p>
-      ${e.note ? `<p class="text-sm text-hl mb-1">${e.note}</p>` : ''}
+      <p class="text-sm mb-1"><span class="text-hl font-semibold">${e.sets} séries</span> x <span class="text-hl font-semibold">${e.reps}</span> repetições</p>
       <div class="flex items-center justify-between gap-3 my-3">
         <div class="flex gap-2 flex-wrap">${circles}</div>
         <label class="shrink-0 text-right">
           <span class="block text-[11px] text-mute mb-1">Carga Atual (kg)</span>
           <input type="number" inputmode="decimal" step="0.5" min="0" placeholder="0" value="${load}" data-load="${name}" class="w-20 rounded-lg border border-line bg-bg px-2 py-2 text-center text-base font-semibold text-hl focus:outline-none focus:border-hl">
         </label>
-      </div>
-      <div class="flex gap-2">
-        <select data-swap="${g}" aria-label="Alternar exercício equivalente" class="flex-1 min-w-0 rounded-lg border border-line bg-bg px-2.5 py-2 text-sm text-mute">${opts}</select>
-        <button data-cycle="${g}" class="shrink-0 rounded-lg border border-line bg-bg px-3.5 py-2 text-sm font-semibold text-hl active:scale-95">⇄ Alternar</button>
-      </div>
+      </div>${swap}
     </article>`;
   }).join('');
   $panel.innerHTML = html;
