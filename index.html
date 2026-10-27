@@ -60,7 +60,7 @@ const DAYS = [
   { short: 'Seg', title: 'Full Body A', tag: 'Musculação', kind: 'strength', plan: 'A' },
   { short: 'Ter', title: 'Corrida · Squad Javali', tag: 'Cardio', kind: 'cardio', note: 'Treino com o Squad Javali, intensidade conforme a programação.' },
   { short: 'Qua', title: 'Full Body B', tag: 'Musculação', kind: 'strength', plan: 'B' },
-  { short: 'Qui', title: 'Corrida Leve a Moderada', tag: 'Cardio', kind: 'cardio', note: 'Preferencialmente corrida leve a moderada, de 30 a 45 minutos, conforme a recuperação. Sem cardio obrigatório após a musculação.' },
+  { short: 'Qui', title: 'Corrida · Squad Javali', tag: 'Cardio', kind: 'cardio', note: 'Treino com o Squad Javali. Se preferir, faça uma corrida leve a moderada de 30 a 45 minutos, conforme a recuperação. Sem cardio obrigatório após a musculação.' },
   { short: 'Sex', title: 'Full Body C', tag: 'Musculação', kind: 'strength', plan: 'C' },
   { short: 'Sáb', title: 'Descanso', tag: 'Descanso', kind: 'rest', note: 'Dia de descanso. Durma bem e deixe o corpo se recuperar.' },
   { short: 'Dom', title: 'Descanso', tag: 'Descanso', kind: 'rest', note: 'Descanso. Uma corrida leve no domingo pode substituir uma das corridas da semana, mas não é obrigatória.' }
@@ -77,42 +77,75 @@ const INFO = {
   C: { dur: '50–60 min', extra: 'Se a corrida de quinta foi muito intensa, ajuste o trabalho de pernas hoje.' }
 };
 
+/* Cada grupo é UM exercício; os itens são as variações selecionáveis. */
 const GROUPS = {
-  supinoMaq: ['Supino Reto na Máquina', 'Supino Reto com Halteres', 'Supino Reto (Barra)'],
-  puxadaFrente: ['Puxada Alta na Frente', 'Puxada com Triângulo', 'Pulldown na Polia'],
-  legPress: ['Leg Press 45°', 'Agachamento Hack', 'Agachamento no Smith'],
-  desenvMaq: ['Desenvolvimento de Ombros na Máquina', 'Desenvolvimento com Halteres', 'Desenvolvimento com Barra'],
-  triPolia: ['Tríceps na Polia', 'Tríceps Testa na Polia', 'Tríceps Coice'],
-  roscaDireta: ['Rosca Direta', 'Rosca na Máquina'],
-  remadaSent: ['Remada Sentada na Máquina', 'Remada Baixa Sentada', 'Remada Aberta na Máquina'],
-  supIncMaq: ['Supino Inclinado na Máquina', 'Supino Inclinado (Halteres)', 'Supino Inclinado com Barra'],
-  flexora: ['Mesa Flexora (Deitado)', 'Cadeira Flexora (Sentado)'],
-  lateral: ['Elevação Lateral (Halteres)', 'Elevação Lateral no Cabo'],
-  roscaScott: ['Rosca Scott na Máquina', 'Rosca Scott'],
-  triAcima: ['Tríceps Acima da Cabeça na Polia'],
-  chestPress: ['Chest Press (Máquina)', 'Supino Reto com Halteres', 'Supino Reto (Barra)'],
-  remadaArt: ['Remada Articulada'],
-  extensora: ['Cadeira Extensora', 'Cadeira Extensora Unilateral'],
-  martelo: ['Rosca Martelo (Halteres)', 'Rosca Martelo na Polia com Corda'],
-  triCorda: ['Tríceps na Corda']
+  aSupino: ['Supino Reto na Máquina', 'Supino Reto com Barra Livre', 'Supino Reto com Halteres'],
+  aPuxada: ['Puxada Alta com Barra Aberta', 'Puxada Alta com Pegada Neutra'],
+  aLeg: ['Leg Press 45°', 'Leg Press Horizontal'],
+  aDesenv: ['Desenvolvimento na Máquina', 'Desenvolvimento com Halteres'],
+  aTriceps: ['Tríceps na Polia com Barra Reta', 'Tríceps na Polia com Barra W', 'Tríceps na Polia com Corda'],
+  aRosca: ['Rosca Direta com Barra W Livre', 'Rosca Direta com Barra W na Polia'],
+  bRemada: ['Remada Sentada na Máquina', 'Remada Sentada na Polia Baixa'],
+  bInclinado: ['Supino Inclinado na Máquina', 'Supino Inclinado com Halteres'],
+  bFlexora: ['Mesa Flexora', 'Cadeira Flexora'],
+  bLateral: ['Elevação Lateral com Halteres', 'Elevação Lateral na Máquina'],
+  bScott: ['Rosca Scott na Máquina', 'Rosca Scott com Barra W no Banco'],
+  bAcima: ['Tríceps Acima da Cabeça na Polia com Corda', 'Tríceps Acima da Cabeça com Halter'],
+  cPress: ['Chest Press na Máquina', 'Supino Reto com Barra Livre', 'Supino Reto com Halteres'],
+  cRemada: ['Remada Articulada na Máquina', 'Remada com Apoio para o Peito'],
+  cExtensora: ['Cadeira Extensora na Máquina'],
+  cFlexora: ['Mesa Flexora', 'Cadeira Flexora'],
+  cInverso: ['Peck Deck Inverso na Máquina', 'Crucifixo Inverso com Halteres e Tronco Inclinado'],
+  cMartelo: ['Rosca Martelo com Halteres', 'Rosca Martelo com Corda na Polia'],
+  cCorda: ['Tríceps na Polia Alta com Corda']
 };
 const PLANS = {
   A: [
-    { g: 'supinoMaq', sets: 3, reps: '8–12' }, { g: 'puxadaFrente', sets: 3, reps: '8–12' },
-    { g: 'legPress', sets: 3, reps: '10–12' }, { g: 'desenvMaq', sets: 2, reps: '8–12' },
-    { g: 'triPolia', sets: 2, reps: '10–15' }, { g: 'roscaDireta', sets: 2, reps: '10–12' }
+    { g: 'aSupino', label: 'Supino Reto', sets: 3, reps: '8–12' },
+    { g: 'aPuxada', label: 'Puxada Alta na Frente', sets: 3, reps: '8–12' },
+    { g: 'aLeg', label: 'Leg Press', sets: 3, reps: '10–12' },
+    { g: 'aDesenv', label: 'Desenvolvimento de Ombros', sets: 2, reps: '8–12' },
+    { g: 'aTriceps', label: 'Tríceps na Polia', sets: 2, reps: '10–15' },
+    { g: 'aRosca', label: 'Rosca Direta', sets: 2, reps: '10–12' }
   ],
   B: [
-    { g: 'remadaSent', sets: 3, reps: '8–12' }, { g: 'supIncMaq', sets: 3, reps: '8–12' },
-    { g: 'flexora', sets: 3, reps: '10–15' }, { g: 'lateral', sets: 3, reps: '12–15' },
-    { g: 'roscaScott', sets: 2, reps: '10–12' }, { g: 'triAcima', sets: 2, reps: '10–15' }
+    { g: 'bRemada', label: 'Remada Sentada', sets: 3, reps: '8–12' },
+    { g: 'bInclinado', label: 'Supino Inclinado', sets: 3, reps: '8–12' },
+    { g: 'bFlexora', label: 'Flexora', sets: 3, reps: '10–15' },
+    { g: 'bLateral', label: 'Elevação Lateral', sets: 3, reps: '12–15' },
+    { g: 'bScott', label: 'Rosca Scott', sets: 2, reps: '10–12' },
+    { g: 'bAcima', label: 'Tríceps Acima da Cabeça', sets: 2, reps: '10–15' }
   ],
   C: [
-    { g: 'chestPress', sets: 3, reps: '8–12' }, { g: 'remadaArt', sets: 3, reps: '8–12' },
-    { g: 'extensora', sets: 2, reps: '10–15' }, { g: 'flexora', sets: 2, reps: '10–15' },
-    { g: 'lateral', sets: 2, reps: '12–15' }, { g: 'martelo', sets: 2, reps: '10–12' },
-    { g: 'triCorda', sets: 2, reps: '10–15' }
+    { g: 'cPress', label: 'Supino Reto / Chest Press', sets: 3, reps: '8–12' },
+    { g: 'cRemada', label: 'Remada Articulada', sets: 3, reps: '8–12' },
+    { g: 'cExtensora', label: 'Cadeira Extensora', sets: 2, reps: '10–15' },
+    { g: 'cFlexora', label: 'Flexora', sets: 2, reps: '10–15' },
+    { g: 'cInverso', label: 'Crucifixo Inverso', sets: 2, reps: '12–15' },
+    { g: 'cMartelo', label: 'Rosca Martelo', sets: 2, reps: '10–12' },
+    { g: 'cCorda', label: 'Tríceps na Corda', sets: 2, reps: '10–15' }
   ]
+};
+
+/* Nomes antigos: se a variação nova ainda não tem carga, mostra a carga do nome anterior. */
+const LEGACY = {
+  'Supino Reto com Barra Livre': 'Supino Reto (Barra)',
+  'Puxada Alta com Barra Aberta': 'Puxada Alta na Frente',
+  'Desenvolvimento na Máquina': 'Desenvolvimento de Ombros na Máquina',
+  'Tríceps na Polia com Barra Reta': 'Tríceps na Polia',
+  'Rosca Direta com Barra W Livre': 'Rosca Direta',
+  'Supino Inclinado com Halteres': 'Supino Inclinado (Halteres)',
+  'Mesa Flexora': 'Mesa Flexora (Deitado)',
+  'Cadeira Flexora': 'Cadeira Flexora (Sentado)',
+  'Elevação Lateral com Halteres': 'Elevação Lateral (Halteres)',
+  'Elevação Lateral na Máquina': 'Elevação Lateral no Cabo',
+  'Tríceps Acima da Cabeça na Polia com Corda': 'Tríceps Acima da Cabeça na Polia',
+  'Chest Press na Máquina': 'Chest Press (Máquina)',
+  'Remada Articulada na Máquina': 'Remada Articulada',
+  'Cadeira Extensora na Máquina': 'Cadeira Extensora',
+  'Rosca Martelo com Halteres': 'Rosca Martelo (Halteres)',
+  'Rosca Martelo com Corda na Polia': 'Rosca Martelo na Polia com Corda',
+  'Tríceps na Polia Alta com Corda': 'Tríceps na Corda'
 };
 
 const $week = document.getElementById('week');
@@ -136,6 +169,11 @@ try {
 function save() { try { localStorage.setItem('treino-hipertrofia-v2', JSON.stringify(state)); } catch (e) {} }
 
 const choiceOf = g => Math.min(state.choices[g] || 0, GROUPS[g].length - 1);
+const loadOf = name => {
+  if (state.loads[name] !== undefined) return state.loads[name];
+  const old = LEGACY[name];
+  return old && state.loads[old] !== undefined ? state.loads[old] : '';
+};
 const checkKey = (day, g, s) => WID + ':' + day + ':' + g + ':' + s;
 const isDone = (day, g, s) => !!state.checks[checkKey(day, g, s)];
 
@@ -188,21 +226,20 @@ function renderPanel() {
       const on = isDone(selected, g, s);
       return `<button data-g="${g}" data-s="${s}" aria-pressed="${on}" aria-label="Série ${s + 1}" class="set h-11 w-11 rounded-full border-2 font-bold text-sm active:scale-90 transition ${on ? 'bg-hl border-hl text-bg glow' : 'border-line text-mute'}">${s + 1}</button>`;
     }).join('');
-    const load = state.loads[name] == null ? '' : state.loads[name];
     const swap = GROUPS[g].length > 1 ? `
       <div class="flex gap-2">
-        <select data-swap="${g}" aria-label="Alternar exercício equivalente" class="flex-1 min-w-0 rounded-lg border border-line bg-bg px-2.5 py-2 text-sm text-mute">${opts}</select>
+        <select data-swap="${g}" aria-label="Escolher variação do exercício" class="flex-1 min-w-0 rounded-lg border border-line bg-bg px-2.5 py-2 text-sm text-mute">${opts}</select>
         <button data-cycle="${g}" class="shrink-0 rounded-lg border border-line bg-bg px-3.5 py-2 text-sm font-semibold text-hl active:scale-95">⇄ Alternar</button>
       </div>` : '';
     return `<article class="rounded-2xl border border-line bg-card p-4 mb-3.5">
-      <p class="text-xs text-mute mb-0.5">Exercício ${n + 1}</p>
+      <p class="text-xs text-mute mb-0.5">Exercício ${n + 1} · ${e.label}</p>
       <h3 class="text-lg font-bold leading-snug mb-1">${name}</h3>
       <p class="text-sm mb-1"><span class="text-hl font-semibold">${e.sets} séries</span> x <span class="text-hl font-semibold">${e.reps}</span> repetições</p>
       <div class="flex items-center justify-between gap-3 my-3">
         <div class="flex gap-2 flex-wrap">${circles}</div>
         <label class="shrink-0 text-right">
           <span class="block text-[11px] text-mute mb-1">Carga Atual (kg)</span>
-          <input type="number" inputmode="decimal" step="0.5" min="0" placeholder="0" value="${load}" data-load="${name}" class="w-20 rounded-lg border border-line bg-bg px-2 py-2 text-center text-base font-semibold text-hl focus:outline-none focus:border-hl">
+          <input type="number" inputmode="decimal" step="0.5" min="0" placeholder="0" value="${loadOf(name)}" data-load="${name}" class="w-20 rounded-lg border border-line bg-bg px-2 py-2 text-center text-base font-semibold text-hl focus:outline-none focus:border-hl">
         </label>
       </div>${swap}
     </article>`;
@@ -219,7 +256,7 @@ $panel.addEventListener('change', e => {
 });
 $panel.addEventListener('input', e => {
   const name = e.target.dataset.load; if (!name) return;
-  if (e.target.value === '') delete state.loads[name]; else state.loads[name] = e.target.value;
+  state.loads[name] = e.target.value;
   save();
 });
 $panel.addEventListener('click', e => {
